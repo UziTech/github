@@ -19358,6 +19358,9 @@ type SmimeSignature implements GitSignature {
   wasSignedByGitHub: Boolean!
 }
 
+"""Entites that can sponsor others via GitHub Sponsors"""
+union Sponsor = Organization | User
+
 """Entities that can be sponsored through GitHub Sponsors"""
 interface Sponsorable {
   """The GitHub Sponsors listing for this user."""
@@ -19423,9 +19426,9 @@ type Sponsorship implements Node {
   privacyLevel: SponsorshipPrivacy!
 
   """
-  The entity that is sponsoring. Returns null if the sponsorship is private
+  The user or organization that is sponsoring. Returns null if the sponsorship is private.
   """
-  sponsor: User
+  sponsorEntity: Sponsor
 
   """The entity that is being sponsored"""
   sponsorable: Sponsorable!
@@ -23160,6 +23163,14 @@ type User implements Node & Actor & RegistryPackageOwner & RegistryPackageSearch
     """The login of the organization to find."""
     login: String!
   ): Organization
+
+  """
+  Verified email addresses that match verified domains for a specified organization the user is a member of.
+  """
+  organizationVerifiedDomainEmails(
+    """The login of the organization to match verified domains from."""
+    login: String!
+  ): [String!]!
 
   """A list of organizations the user belongs to."""
   organizations(
