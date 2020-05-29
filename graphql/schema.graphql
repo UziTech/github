@@ -541,6 +541,48 @@ enum AuditLogOrderField {
 }
 
 """
+Represents a 'automatic_base_change_failed' event on a given pull request.
+"""
+type AutomaticBaseChangeFailedEvent implements Node {
+  """Identifies the actor who performed the event."""
+  actor: Actor
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  id: ID!
+
+  """The new base for this PR"""
+  newBase: String!
+
+  """The old base for this PR"""
+  oldBase: String!
+
+  """PullRequest referenced by event."""
+  pullRequest: PullRequest!
+}
+
+"""
+Represents a 'automatic_base_change_succeeded' event on a given pull request.
+"""
+type AutomaticBaseChangeSucceededEvent implements Node {
+  """Identifies the actor who performed the event."""
+  actor: Actor
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  id: ID!
+
+  """The new base for this PR"""
+  newBase: String!
+
+  """The old base for this PR"""
+  oldBase: String!
+
+  """PullRequest referenced by event."""
+  pullRequest: PullRequest!
+}
+
+"""
 Represents a 'base_ref_changed' event on a given issue or pull request.
 """
 type BaseRefChangedEvent implements Node {
@@ -622,7 +664,14 @@ type Blob implements Node & GitObject {
   commitUrl: URI!
   id: ID!
 
-  """Indicates whether the Blob is binary or text"""
+  """
+  Indicates whether the Blob is binary or text
+  
+  **Upcoming Change on 2019-07-01 UTC**
+  **Description:** Type for `isBinary` will change from `Boolean!` to `Boolean`.
+  **Reason:** The `isBinary` field may return `null` when it cannot determine if a Blob is binary.
+  
+  """
   isBinary: Boolean!
 
   """Indicates whether the contents is truncated"""
@@ -5275,16 +5324,16 @@ type EnterpriseOwnerInfo {
   ): EnterpriseAdministratorInvitationConnection!
 
   """
-  A list of pending collaborators across the repositories in the enterprise.
+  A list of pending collaborator invitations across the repositories in the enterprise.
   """
-  pendingCollaborators(
+  pendingCollaboratorInvitations(
     """The search string to look for."""
     query: String
 
     """
     Ordering options for pending repository collaborator invitations returned from the connection.
     """
-    orderBy: RepositoryInvitationOrder = {field: INVITEE_LOGIN, direction: ASC}
+    orderBy: RepositoryInvitationOrder = {field: CREATED_AT, direction: DESC}
 
     """Returns the elements in the list that come after the specified cursor."""
     after: String
@@ -5299,7 +5348,7 @@ type EnterpriseOwnerInfo {
 
     """Returns the last _n_ elements from the list."""
     last: Int
-  ): EnterprisePendingCollaboratorConnection!
+  ): RepositoryInvitationConnection!
 
   """
   A list of pending member invitations for organizations in the enterprise.
@@ -9680,6 +9729,33 @@ type Organization implements Node & Actor & RegistryPackageOwner & RegistryPacka
   email: String
   id: ID!
 
+  """
+  The setting value for whether the organization has an IP allow list enabled.
+  """
+  ipAllowListEnabledSetting: IpAllowListEnabledSettingValue!
+
+  """
+  The IP addresses that are allowed to access resources owned by the organization.
+  """
+  ipAllowListEntries(
+    """Returns the elements in the list that come after the specified cursor."""
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """Returns the first _n_ elements from the list."""
+    first: Int
+
+    """Returns the last _n_ elements from the list."""
+    last: Int
+
+    """Ordering options for IP allow list entries returned."""
+    orderBy: IpAllowListEntryOrder = {field: ALLOW_LIST_VALUE, direction: ASC}
+  ): IpAllowListEntryConnection!
+
   """Whether the organization has verified its profile email and website."""
   isVerified: Boolean!
 
@@ -10020,6 +10096,9 @@ type Organization implements Node & Actor & RegistryPackageOwner & RegistryPacka
 
   """The HTTP URL listing organization's teams"""
   teamsUrl: URI!
+
+  """The organization's Twitter username."""
+  twitterUsername: String
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: DateTime!
@@ -14177,7 +14256,7 @@ type PullRequestTimelineItemEdge {
 }
 
 """An item in a pull request timeline"""
-union PullRequestTimelineItems = AddedToProjectEvent | AssignedEvent | BaseRefChangedEvent | BaseRefForcePushedEvent | ClosedEvent | CommentDeletedEvent | ConnectedEvent | ConvertToDraftEvent | ConvertedNoteToIssueEvent | CrossReferencedEvent | DemilestonedEvent | DeployedEvent | DeploymentEnvironmentChangedEvent | DisconnectedEvent | HeadRefDeletedEvent | HeadRefForcePushedEvent | HeadRefRestoredEvent | IssueComment | LabeledEvent | LockedEvent | MarkedAsDuplicateEvent | MentionedEvent | MergedEvent | MilestonedEvent | MovedColumnsInProjectEvent | PinnedEvent | PullRequestCommit | PullRequestCommitCommentThread | PullRequestReview | PullRequestReviewThread | PullRequestRevisionMarker | ReadyForReviewEvent | ReferencedEvent | RemovedFromProjectEvent | RenamedTitleEvent | ReopenedEvent | ReviewDismissedEvent | ReviewRequestRemovedEvent | ReviewRequestedEvent | SubscribedEvent | TransferredEvent | UnassignedEvent | UnlabeledEvent | UnlockedEvent | UnmarkedAsDuplicateEvent | UnpinnedEvent | UnsubscribedEvent | UserBlockedEvent
+union PullRequestTimelineItems = AddedToProjectEvent | AssignedEvent | AutomaticBaseChangeFailedEvent | AutomaticBaseChangeSucceededEvent | BaseRefChangedEvent | BaseRefForcePushedEvent | ClosedEvent | CommentDeletedEvent | ConnectedEvent | ConvertToDraftEvent | ConvertedNoteToIssueEvent | CrossReferencedEvent | DemilestonedEvent | DeployedEvent | DeploymentEnvironmentChangedEvent | DisconnectedEvent | HeadRefDeletedEvent | HeadRefForcePushedEvent | HeadRefRestoredEvent | IssueComment | LabeledEvent | LockedEvent | MarkedAsDuplicateEvent | MentionedEvent | MergedEvent | MilestonedEvent | MovedColumnsInProjectEvent | PinnedEvent | PullRequestCommit | PullRequestCommitCommentThread | PullRequestReview | PullRequestReviewThread | PullRequestRevisionMarker | ReadyForReviewEvent | ReferencedEvent | RemovedFromProjectEvent | RenamedTitleEvent | ReopenedEvent | ReviewDismissedEvent | ReviewRequestRemovedEvent | ReviewRequestedEvent | SubscribedEvent | TransferredEvent | UnassignedEvent | UnlabeledEvent | UnlockedEvent | UnmarkedAsDuplicateEvent | UnpinnedEvent | UnsubscribedEvent | UserBlockedEvent
 
 """The connection type for PullRequestTimelineItems."""
 type PullRequestTimelineItemsConnection {
@@ -14234,6 +14313,16 @@ enum PullRequestTimelineItemsItemType {
   Represents the latest point in the pull request timeline for which the viewer has seen the pull request's commits.
   """
   PULL_REQUEST_REVISION_MARKER
+
+  """
+  Represents a 'automatic_base_change_failed' event on a given pull request.
+  """
+  AUTOMATIC_BASE_CHANGE_FAILED_EVENT
+
+  """
+  Represents a 'automatic_base_change_succeeded' event on a given pull request.
+  """
+  AUTOMATIC_BASE_CHANGE_SUCCEEDED_EVENT
 
   """
   Represents a 'base_ref_changed' event on a given issue or pull request.
@@ -15017,7 +15106,14 @@ type Ref implements Node {
   """The repository the ref belongs to."""
   repository: Repository!
 
-  """The object the ref points to."""
+  """
+  The object the ref points to.
+  
+  **Upcoming Change on 2019-07-01 UTC**
+  **Description:** Type for `target` will change from `GitObject!` to `GitObject`.
+  **Reason:** The `target` field may return `null` values and is changing to nullable
+  
+  """
   target: GitObject!
 }
 
@@ -18016,7 +18112,14 @@ type RepositoryCollaboratorEdge {
   cursor: String!
   node: User!
 
-  """The permission the user has on the repository."""
+  """
+  The permission the user has on the repository.
+  
+  **Upcoming Change on 2020-10-01 UTC**
+  **Description:** Type for `permission` will change from `RepositoryPermission!` to `String`.
+  **Reason:** This field may return additional values
+  
+  """
   permission: RepositoryPermission!
 
   """A list of sources for the user's access to the repository."""
@@ -18165,19 +18268,52 @@ interface RepositoryInfo {
 
 """An invitation for a user to be added to a repository."""
 type RepositoryInvitation implements Node {
+  """The email address that received the invitation."""
+  email: String
   id: ID!
 
   """The user who received the invitation."""
-  invitee: User!
+  invitee: User
 
   """The user who created the invitation."""
   inviter: User!
 
-  """The permission granted on this repository by this invitation."""
+  """
+  The permission granted on this repository by this invitation.
+  
+  **Upcoming Change on 2020-10-01 UTC**
+  **Description:** Type for `permission` will change from `RepositoryPermission!` to `String`.
+  **Reason:** This field may return additional values
+  
+  """
   permission: RepositoryPermission!
 
   """The Repository the user is invited to."""
   repository: RepositoryInfo
+}
+
+"""The connection type for RepositoryInvitation."""
+type RepositoryInvitationConnection {
+  """A list of edges."""
+  edges: [RepositoryInvitationEdge]
+
+  """A list of nodes."""
+  nodes: [RepositoryInvitation]
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """Identifies the total count of items in the connection."""
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type RepositoryInvitationEdge {
+  """A cursor for use in pagination."""
+  cursor: String!
+
+  """The item at the end of the edge."""
+  node: RepositoryInvitation
 }
 
 """Ordering options for repository invitation connections."""
@@ -18193,9 +18329,6 @@ input RepositoryInvitationOrder {
 enum RepositoryInvitationOrderField {
   """Order repository invitations by creation time"""
   CREATED_AT
-
-  """Order repository invitations by invitee login"""
-  INVITEE_LOGIN
 }
 
 """The possible reasons a given repository could be in a locked state."""
@@ -19358,6 +19491,9 @@ type SmimeSignature implements GitSignature {
   wasSignedByGitHub: Boolean!
 }
 
+"""Entites that can sponsor others via GitHub Sponsors"""
+union Sponsor = Organization | User
+
 """Entities that can be sponsored through GitHub Sponsors"""
 interface Sponsorable {
   """The GitHub Sponsors listing for this user."""
@@ -19423,9 +19559,9 @@ type Sponsorship implements Node {
   privacyLevel: SponsorshipPrivacy!
 
   """
-  The entity that is sponsoring. Returns null if the sponsorship is private
+  The user or organization that is sponsoring. Returns null if the sponsorship is private.
   """
-  sponsor: User
+  sponsorEntity: Sponsor
 
   """The entity that is being sponsored"""
   sponsorable: Sponsorable!
@@ -21208,7 +21344,14 @@ type TeamRepositoryEdge {
   cursor: String!
   node: Repository!
 
-  """The permission level the team has on the repository"""
+  """
+  The permission level the team has on the repository
+  
+  **Upcoming Change on 2020-10-01 UTC**
+  **Description:** Type for `permission` will change from `RepositoryPermission!` to `String`.
+  **Reason:** This field may return additional values
+  
+  """
   permission: RepositoryPermission!
 }
 
@@ -23161,6 +23304,14 @@ type User implements Node & Actor & RegistryPackageOwner & RegistryPackageSearch
     login: String!
   ): Organization
 
+  """
+  Verified email addresses that match verified domains for a specified organization the user is a member of.
+  """
+  organizationVerifiedDomainEmails(
+    """The login of the organization to match verified domains from."""
+    login: String!
+  ): [String!]!
+
   """A list of organizations the user belongs to."""
   organizations(
     """Returns the elements in the list that come after the specified cursor."""
@@ -23532,6 +23683,9 @@ type User implements Node & Actor & RegistryPackageOwner & RegistryPackageSearch
     """How far back in time to fetch contributed repositories"""
     since: DateTime
   ): RepositoryConnection!
+
+  """The user's Twitter username."""
+  twitterUsername: String
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: DateTime!
